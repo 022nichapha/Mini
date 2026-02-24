@@ -3,249 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thunder Express Desktop</title>
+    <title>Thunder Express - ระบบจัดการพัสดุ</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;900&display=swap" rel="stylesheet">
-    <style>
-        /* CSS พื้นฐานเพื่อให้ระบบ Modal และ Layout ทำงานได้ (กรณีไฟล์ style.css ไม่โหลด) */
-        :root { --primary: #FFCC00; --dark: #1a1a1a; --white: #ffffff; }
-        body { font-family: 'Kanit', sans-serif; margin: 0; background: #f4f4f4; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        
-        /* Nav & Search */
-        .top-nav { background: var(--primary); padding: 15px 0; }
-        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 900; font-size: 24px; font-style: italic; }
-        .search-wrapper { display: flex; background: white; border-radius: 25px; padding: 5px 15px; width: 40%; }
-        .search-wrapper input { border: none; outline: none; width: 100%; padding: 8px; font-family: 'Kanit'; }
-        .search-wrapper button { background: var(--dark); color: white; border: none; border-radius: 20px; padding: 5px 20px; cursor: pointer; }
-
-        /* Services Grid */
-        .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 40px; }
-        .service-card { background: white; padding: 30px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .service-card .icon { font-size: 40px; margin-bottom: 15px; }
-
-        /* Modals */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
-        .modal-content { background: white; margin: 10% auto; padding: 0; width: 450px; border-radius: 15px; position: relative; animation: slideDown 0.3s; }
-        @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 0; opacity: 1; } }
-        .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 25px; }
-        .close { font-size: 28px; cursor: pointer; color: #999; }
-        
-        /* Auth Styles */
-        .tabs { display: flex; border-bottom: 1px solid #eee; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-family: 'Kanit'; font-weight: 600; }
-        .tab-btn.active { border-bottom: 3px solid var(--primary); color: var(--dark); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-primary { width: 100%; background: var(--primary); border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        
-        /* Search Result Styles */
-        .parcel-item { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; }
-        .status-badge { background: #27ae60; color: white; padding: 2px 10px; border-radius: 10px; font-size: 12px; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <nav class="top-nav">
         <div class="container nav-flex">
             <div class="logo">THUNDER <span>EXPRESS</span></div>
-            <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="กรอกหมายเลขพัสดุ (เช่น TH123)...">
-                <button onclick="searchParcel()">ค้นหา</button>
+            <div class="search-bar-header">
+                <input type="text" placeholder="กรอกหมายเลขพัสดุเพื่อติดตาม...">
+                <button class="btn-search">ค้นหา</button>
             </div>
             <div class="nav-links">
-                <a href="#" style="text-decoration:none; color:black; margin-right:15px;">หน้าหลัก</a>
-                <span id="userInfo" style="display:none;">
-                    <strong id="displayUserName"></strong> | 
-                    <a href="#" onclick="logout()" style="color:red;">ออกจากระบบ</a>
-                </span>
-                <button id="loginBtn" onclick="openAuthModal()" style="background:var(--dark); color:white; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;">เข้าสู่ระบบ</button>
+                <a href="#" onclick="showPage('home')">หน้าหลัก</a>
+                <a href="#" onclick="showPage('tracking')">บริการของเรา</a>
+                <a href="#" onclick="showPage('calc')">เช็คราคา</a>
+                <span class="user-name">นิชา |</span>
+                <a href="#" class="logout" onclick="showPage('login')">ออกจากระบบ</a>
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <section style="display:flex; align-items:center; padding:60px 0; gap:40px;">
-            <div style="flex:1;">
-                <h1 style="font-size:48px; line-height:1.1;">ส่งด่วน ทันใจ<br><span style="color:#e6b800">THUNDER EXPRESS</span></h1>
-                <p>บริการขนส่งพัสดุทั่วไทย ถึงไวในวันถัดไป มั่นใจทุกการส่ง</p>
+    <main id="page-home" class="page container">
+        <section class="banner-section">
+            <div class="social-floating">
+                <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="FB">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="IG">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="Line">
             </div>
-            <div style="flex:1; text-align:right;">
-                <img src="https://www.sumupth.com/wp-content/uploads/2025/06/TASTE-ET020625-W-W.jpg" style="width:100%; border-radius:20px;">
+            <div class="main-banner">
+                <img src="https://www.tnnthailand.com/static/2025/72ae2b8c-4b19-4e6b-b86a-f0ddd8eaf48a.webp" alt="poster">
+            <div class="quick-search-box">
+                <input type="text" placeholder="กรุณากรอกเลขพัสดุของคุณ">
+                <button class="btn-yellow">ตรวจเช็คพัสดุ</button>
             </div>
         </section>
 
-        <section class="services-container">
-            <h2 style="text-align:center;">บริการแนะนำ</h2>
-            <div class="services-grid">
-                <div class="service-card" onclick="showServiceDetail('shipping')">
-                    <div class="icon">📦</div>
-                    <h3>ส่งพัสดุ</h3>
-                    <p>ส่งง่าย ได้ทุกสาขา</p>
-                </div>
-                <div class="service-card" onclick="showServiceDetail('tracking')">
-                    <div class="icon">🔍</div>
-                    <h3>ติดตามพัสดุ</h3>
-                    <p>เช็คได้ 24 ชั่วโมง</p>
-                </div>
-                <div class="service-card" onclick="showServiceDetail('calculator')">
-                    <div class="icon">💰</div>
-                    <h3>คำนวณค่าส่ง</h3>
-                    <p>ราคาประหยัด เริ่ม 25.-</p>
-                </div>
-                <div class="service-card" onclick="showServiceDetail('pickup')">
-                    <div class="icon">🏠</div>
-                    <h3>เข้ารับถึงที่</h3>
-                    <p>เรียกฟรี ไม่มีขั้นต่ำ</p>
-                </div>
+        <div class="circle-menu-container">
+            <div class="menu-item" onclick="showPage('calc')">
+                <div class="icon-circle yellow">🛒</div>
+                <p>คำนวณค่าจัดส่ง</p>
             </div>
-        </section>
+            <div class="menu-item" onclick="showPage('tracking')">
+                <div class="icon-circle yellow">📦</div>
+                <p>ติดตามพัสดุ</p>
+            </div>
+            <div class="menu-item" onclick="showPage('partners')">
+                <div class="icon-circle yellow">👥</div>
+                <p>ผู้บริหาร</p>
+            </div>
+            <div class="menu-item" onclick="showPage('contact')">
+                <div class="icon-circle yellow">💬</div>
+                <p>ติดต่อ</p>
+            </div>
+            <div class="menu-item">
+                <div class="icon-circle yellow">📍</div>
+                <p>สาขาใกล้เคียง</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">บริการแนะนำ</h2>
+        <div class="service-grid">
+            <div class="s-card">
+                <div class="s-icon">📦</div>
+                <h4>ส่งพัสดุ</h4>
+                <p>บริการส่งพัสดุจากหน้าร้านหรือจุดรับบริการ</p>
+                <button class="btn-s" onclick="showPage('add-shipment')">เพิ่ม</button>
+            </div>
+            <div class="s-card">
+                <div class="s-icon">📋</div>
+                <h4>เคลมพัสดุ</h4>
+                <p>แจ้งปัญหาหรือเคลมสินค้าเสียหาย</p>
+                <button class="btn-s" onclick="showPage('claim-status')">แจ้งเติม</button>
+            </div>
+            <div class="s-card">
+                <div class="s-icon">🏠</div>
+                <h4>รับพัสดุ</h4>
+                <p>รายการพัสดุที่รอการรับมอบ</p>
+                <button class="btn-s" onclick="showPage('add-receive')">เพิ่ม</button>
+            </div>
+        </div>
     </main>
 
-    <div id="authModal" class="modal">
-        <div class="modal-content">
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
-                <button class="tab-btn" onclick="switchAuthTab('register')">สมัครสมาชิก</button>
-                <span onclick="closeModal('authModal')" class="close" style="padding:10px 20px;">&times;</span>
+    <main id="page-add-shipment" class="page container" style="display:none;">
+        <div class="back-nav" onclick="showPage('home')"> ❮ เพิ่มรายการส่งพัสดุ</div>
+        <div class="form-container">
+            <h3>ข้อมูลผู้ส่ง - ผู้รับ</h3>
+            <div class="field-group">
+                <label><span class="red">*</span> ชื่อ-นามสกุล ผู้ส่ง</label>
+                <input type="text" placeholder="ระบุชื่อผู้ส่ง">
             </div>
-            
-            <div id="loginTab" class="modal-body">
-                <form onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label>อีเมล หรือ ชื่อผู้ใช้</label>
-                        <input type="text" id="loginUser" required placeholder="admin@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>รหัสผ่าน</label>
-                        <input type="password" id="loginPass" required placeholder="123456">
-                    </div>
-                    <button type="submit" class="btn-primary">ยืนยันเข้าสู่ระบบ</button>
-                </form>
+            <div class="field-group">
+                <label><span class="red">*</span> เบอร์โทรศัพท์ผู้รับ</label>
+                <input type="text" placeholder="ระบุเบอร์โทรศัพท์ผู้รับ">
             </div>
+            <div class="field-group">
+                <label><span class="red">*</span> ที่อยู่ปลายทาง</label>
+                <textarea placeholder="ระบุที่อยู่โดยละเอียด"></textarea>
+            </div>
+            <button class="btn-yellow full" onclick="alert('บันทึกข้อมูลส่งพัสดุสำเร็จ')">ยืนยันข้อมูลการส่ง</button>
+        </div>
+    </main>
 
-            <div id="registerTab" class="modal-body" style="display:none;">
-                <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label>ชื่อ-นามสกุล</label>
-                        <input type="text" id="regName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>อีเมล</label>
-                        <input type="email" id="regEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label>รหัสผ่าน</label>
-                        <input type="password" id="regPass" required>
-                    </div>
-                    <button type="submit" class="btn-primary">สมัครสมาชิก</button>
-                </form>
+    <main id="page-add-receive" class="page container" style="display:none;">
+        <div class="back-nav" onclick="showPage('home')"> ❮ เพิ่มรายการรับพัสดุ</div>
+        <div class="form-container">
+            <h3>แจ้งรับพัสดุ (Pick-up)</h3>
+            <div class="field-group">
+                <label><span class="red">*</span> ระบุหมายเลขพัสดุที่ต้องการรับ</label>
+                <input type="text" placeholder="THXXXXXXXXXX">
             </div>
+            <div class="field-group">
+                <label><span class="red">*</span> สถานที่นัดรับ</label>
+                <select class="custom-select">
+                    <option>สาขาใกล้บ้าน</option>
+                    <option>จุดรับพัสดุอัตโนมัติ</option>
+                    <option>นัดรับที่บ้าน</option>
+                </select>
+            </div>
+            <button class="btn-yellow full" onclick="alert('บันทึกรายการนัดรับสำเร็จ')">ลงทะเบียนรับพัสดุ</button>
+        </div>
+    </main>
+
+    <main id="page-calc" class="page container" style="display:none;">
+        <div class="back-nav" onclick="showPage('home')"> ❮ คำนวณค่าจัดส่ง</div>
+        <div class="calc-box">
+            <div class="field-group">
+                <label><span class="red">*</span> ที่อยู่ต้นทาง</label>
+                <input type="text" placeholder="ต้นทาง">
+            </div>
+            <div class="field-group">
+                <label><span class="red">*</span> ที่อยู่ปลายทาง</label>
+                <input type="text" placeholder="ปลายทาง">
+            </div>
+            <div class="field-group">
+                <label><span class="red">*</span> น้ำหนัก (กก.)</label>
+                <input type="number" placeholder="0.00">
+            </div>
+            <div class="calc-btns">
+                <button class="btn-gray">ชำระโดยผู้ส่ง</button>
+                <button class="btn-gray">ชำระโดยผู้รับ</button>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-tracking" class="page container" style="display:none;">
+        <div class="breadcrumb">หน้าแรก > ติดตามพัสดุ</div>
+        <div class="content-box">
+            <div class="search-large">
+                <input type="text" placeholder="กรุณากรอกเลขพัสดุ">
+                <button class="btn-yellow">ตรวจเช็ค</button>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-claim-status" class="page container" style="display:none;">
+        <div class="breadcrumb">หน้าแรก > ยื่นเคลม</div>
+        <div class="claim-header">
+            <span class="claim-icon">🪙</span>
+            <h2>ยื่นเคลม สินค้า</h2>
+        </div>
+        <div class="claim-steps-grid">
+            <div class="steps-text">
+                <div class="step-box active">แนบรูปภาพพัสดุ</div>
+                <div class="step-box">เลือกหัวข้อความเสียหาย</div>
+                <div class="step-box">ระบุรายละเอียด</div>
+            </div>
+            <div class="steps-visual">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdnea9j-Mk0_4SH-uD_3fYwRN-ulY85-58pjZRNVMr0_n4Vy24At2SIALApvW5BGkdC8k&usqp=CAU" alt="Claim">
+                <img src="https://www.plentycomputer.com/images/warranty/RMA_4_Step.jpg" alt="Claim">
+
+            </div>
+        </div>
+    </main>
+
+    <main id="page-ship-status" class="page container" style="display:none;">
+        <div class="back-nav" onclick="showPage('home')"> ❮ สถานะพัสดุ</div>
+        <div class="status-tabs">
+            <button class="tab">รอส่ง</button>
+            <button class="tab active">ได้รับแล้ว</button>
+        </div>
+        <div class="empty-state">ไม่มีข้อมูลพัสดุในขณะนี้</div>
+    </main>
+
+    <main id="page-contact" class="page container" style="display:none;">
+        <div class="back-nav" onclick="showPage('home')"> ❮ ติดต่อเรา</div>
+        <div class="contact-grid">
+            <div class="contact-card">💬 ฝ่ายบริการลูกค้า</div>
+            <div class="contact-card">📞 1212</div>
+        </div>
+    </main>
+
+    <main id="page-partners" class="page container" style="display:none;">
+        <div class="back-nav" onclick="showPage('home')"> ❮ ผู้บริหาร</div>
+        <div class="exec-layout">
+            <div class="exec-card main">
+                <img src="data:image/jpeg;base64,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" alt="CEO">
+                <h4>สันติ แซ่ลี้</h4>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-login" class="page container" style="display:none;">
+        <div class="login-wrapper">
+            <div class="login-card">
+                <h3>เข้าสู่ระบบ</h3>
+                <input type="text" placeholder="เบอร์โทรศัพท์" style="width:100%; padding:10px; margin-bottom:10px;">
+                <button class="btn-yellow full" onclick="showModal()">ตกลง</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="successModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <p>เข้าสู่ระบบสำเร็จ</p>
+            <div class="check-mark">✔</div>
+            <button class="btn-yellow" onclick="closeModal()">ตกลง</button>
         </div>
     </div>
 
-    <div id="infoModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="infoTitle">หัวข้อ</h2>
-                <span class="close" onclick="closeModal('infoModal')">&times;</span>
-            </div>
-            <div id="infoBody" class="modal-body">
-                </div>
-        </div>
-    </div>
-
-    <script>
-        // --- 1. ข้อมูลสมมติ (Database Mockup) ---
-        const mockParcels = {
-            'TH123': { status: 'กำลังจัดส่ง', sender: 'ร้านค้าต้นทาง', receiver: 'คุณสมชาย', location: 'ศูนย์กระจายสินค้า นครปฐม' },
-            'TH456': { status: 'ส่งสำเร็จ', sender: 'บริษัท AAA', receiver: 'คุณสมหญิง', location: 'บ้านผู้รับ' }
-        };
-
-        const serviceInfo = {
-            shipping: { title: 'บริการส่งพัสดุ', content: 'ส่งพัสดุได้ที่หน้าร้านกว่า 1,000 จุดทั่วประเทศ ประกันสินค้า 2,000.-' },
-            tracking: { title: 'ติดตามพัสดุ', content: 'กรอกเลขพัสดุในช่องค้นหาด้านบน เพื่อติดตามสถานะแบบเรียลไทม์' },
-            calculator: { title: 'คำนวณค่าส่ง', content: 'ราคาเริ่มต้น 25 บาท คิดตามน้ำหนักและระยะทางจริง' },
-            pickup: { title: 'เข้ารับถึงที่', content: 'เรียกพนักงานเข้ารับพัสดุฟรีถึงบ้านผ่านหน้าเว็บหรือแอปฯ' }
-        };
-
-        // --- 2. ฟังก์ชันระบบสมาชิก ---
-        function openAuthModal() { document.getElementById('authModal').style.display = 'block'; }
-
-        function switchAuthTab(tab) {
-            const isLogin = tab === 'login';
-            document.getElementById('loginTab').style.display = isLogin ? 'block' : 'none';
-            document.getElementById('registerTab').style.display = isLogin ? 'none' : 'block';
-            document.querySelectorAll('.tab-btn')[0].classList.toggle('active', isLogin);
-            document.querySelectorAll('.tab-btn')[1].classList.toggle('active', !isLogin);
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('loginUser').value;
-            // จำลองการ Login สำเร็จ
-            document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'inline';
-            document.getElementById('displayUserName').innerText = 'คุณ ' + user.split('@')[0];
-            closeModal('authModal');
-            alert('เข้าสู่ระบบสำเร็จ!');
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            alert('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
-            switchAuthTab('login');
-        }
-
-        function logout() {
-            document.getElementById('loginBtn').style.display = 'inline';
-            document.getElementById('userInfo').style.display = 'none';
-            alert('ออกจากระบบแล้ว');
-        }
-
-        // --- 3. ฟังก์ชันค้นหาพัสดุ ---
-        function searchParcel() {
-            const id = document.getElementById('searchInput').value.toUpperCase().trim();
-            const infoTitle = document.getElementById('infoTitle');
-            const infoBody = document.getElementById('infoBody');
-            
-            if (!id) return alert('กรุณากรอกเลขพัสดุ');
-
-            infoTitle.innerText = 'ผลการค้นหา: ' + id;
-            if (mockParcels[id]) {
-                const p = mockParcels[id];
-                infoBody.innerHTML = `
-                    <div class="parcel-item">
-                        <p><strong>สถานะ:</strong> <span class="status-badge">${p.status}</span></p>
-                        <p><strong>จาก:</strong> ${p.sender}</p>
-                        <p><strong>ถึง:</strong> ${p.receiver}</p>
-                        <p><strong>ตำแหน่งล่าสุด:</strong> ${p.location}</p>
-                    </div>
-                `;
-            } else {
-                infoBody.innerHTML = '<p style="color:red; text-align:center;">ไม่พบหมายเลขพัสดุนี้ในระบบ</p>';
-            }
-            document.getElementById('infoModal').style.display = 'block';
-        }
-
-        // --- 4. ฟังก์ชันรายละเอียดบริการ ---
-        function showServiceDetail(type) {
-            const info = serviceInfo[type];
-            document.getElementById('infoTitle').innerText = info.title;
-            document.getElementById('infoBody').innerHTML = `<p>${info.content}</p><button class="btn-primary" onclick="closeModal('infoModal')">รับทราบ</button>`;
-            document.getElementById('infoModal').style.display = 'block';
-        }
-
-        // --- 5. ฟังก์ชันปิด Modal ---
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        window.onclick = function(event) {
-            if (event.target.className === 'modal') { event.target.style.display = 'none'; }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
